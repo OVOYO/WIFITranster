@@ -31,7 +31,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
     public void onBindViewHolder(VH holder, int position) {
         Doc doc = mDocList.get(position);
         holder.name.setText(doc.getName());
-        holder.size.setText("3.14 M");
+        holder.size.setText(doc.getSize());
     }
 
     @Override

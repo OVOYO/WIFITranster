@@ -7,9 +7,11 @@ public class Doc {
 
     private String name;
 
-    private long size;
+    private String size;
 
     private String type;
+
+    private String modified;
 
     public String getPath() {
         return path;
@@ -27,11 +29,11 @@ public class Doc {
         this.name = name;
     }
 
-    public long getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(long size) {
+    public void setSize(String size) {
         this.size = size;
     }
 
@@ -43,13 +45,22 @@ public class Doc {
         this.type = type;
     }
 
+    public String getModified() {
+        return modified;
+    }
+
+    public void setModified(String modified) {
+        this.modified = modified;
+    }
+
     @Override
     public String toString() {
         return "Doc{" +
                 "path='" + path + '\'' +
                 ", name='" + name + '\'' +
-                ", size=" + size +
-                ", type=" + type +
+                ", size='" + size + '\'' +
+                ", type='" + type + '\'' +
+                ", modified='" + modified + '\'' +
                 '}';
     }
 }

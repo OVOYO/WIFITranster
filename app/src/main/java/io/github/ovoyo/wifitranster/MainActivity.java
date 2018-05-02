@@ -28,8 +28,10 @@ import android.widget.Toast;
 import com.hwangjr.rxbus.RxBus;
 import com.hwangjr.rxbus.annotation.Subscribe;
 import com.hwangjr.rxbus.annotation.Tag;
+import com.hwangjr.rxbus.thread.EventThread;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -110,7 +112,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                                 doc = new Doc();
                                 doc.setName(f.getName());
                                 doc.setPath(f.getAbsolutePath());
-                                doc.setSize(f.length());
+                                doc.setSize(Utils.getFileSizeString(f.length()));
+                                doc.setModified(Utils.formatDate(f.lastModified()));
                                 docList.add(doc);
                                 Log.e("-----", "loadData: " + doc.toString() );
                             }
@@ -263,5 +266,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             objectAnimator.setInterpolator(new AccelerateInterpolator());
             objectAnimator.start();
         }
+    }
+
+    @Subscribe( thread = EventThread.MAIN_THREAD, tags = {@Tag( Constants.RxBusEventType.LOAD_BOOK_LIST )} )
+    public void loadAppList(Integer type) {
+        loadData(true);
     }
 }

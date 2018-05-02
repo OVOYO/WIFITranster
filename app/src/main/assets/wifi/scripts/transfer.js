@@ -159,7 +159,11 @@ $(function() {
 	}
 	
 	function checkFileName(fileName) {
-		if (!fileName || !fileName.toLowerCase().match('(epub|txt|pdf)$')) {
+		// if (!fileName || !fileName.toLowerCase().match('(epub|txt|pdf)$')) {
+		// 	return STRINGS.UNSUPPORTED_FILE_TYPE;
+		// }
+
+		if (!fileName) {
 			return STRINGS.UNSUPPORTED_FILE_TYPE;
 		}
 		
