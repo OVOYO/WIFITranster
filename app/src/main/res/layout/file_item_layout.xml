@@ -36,6 +36,7 @@
                 android:singleLine="true"
                 android:textSize="18sp"
                 android:textColor="#4a4a4a"
+                android:textStyle="bold"
                 android:text="WECHAT.apk"/>
 
         <TextView

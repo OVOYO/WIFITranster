@@ -20,6 +20,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.animation.AccelerateInterpolator;
@@ -114,6 +115,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                                 doc.setPath(f.getAbsolutePath());
                                 doc.setSize(Utils.getFileSizeString(f.length()));
                                 doc.setModified(Utils.formatDate(f.lastModified()));
+                                String type = FileTypeUtils.getFileType(f);
+                                if (!TextUtils.isEmpty(type) && type.equals("zip") && doc.getName().endsWith("apk")){
+                                    doc.setType("apk");
+                                }else {
+                                    doc.setType(type);
+                                }
                                 docList.add(doc);
                                 Log.e("-----", "loadData: " + doc.toString() );
                             }
