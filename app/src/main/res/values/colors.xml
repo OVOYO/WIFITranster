@@ -11,6 +11,7 @@
     <color name="bg_circle_default">#ff666666</color>
     <color name="bg_action_mode">#ff757575</color>
     <color name="row_activated">#ffe0e0e0</color>
+    <color name="pop_window_bg">#E7E7E7</color>
 
     <color name="apk">#ff8bc34a</color>
     <color name="zip">#ffe51c23</color>

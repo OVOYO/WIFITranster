@@ -4,6 +4,8 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
+import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -14,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ActionMode;
@@ -48,7 +51,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
-        Animator.AnimatorListener,FileAdapter.FileAdapterClickListener {
+        Animator.AnimatorListener, FileAdapter.FileAdapterClickListener {
 
     private static final int REQ_CODE = 1024;
     private long mCurTimeMills;
@@ -79,21 +82,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main,menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
-    private void enableActionMode(int index){
-        if (mActionMode == null){
+    private void enableActionMode(int index) {
+        if (mActionMode == null) {
             mActionMode = startSupportActionMode(mActionModelCallback);
         }
         toggleSelection(index);
     }
 
-    private void toggleSelection(int index){
+    private void toggleSelection(int index) {
         mFileAdapter.toggleSelection(index);
         int count = mFileAdapter.getSelectedItemCount();
-        if (count == 0){
+        if (count == 0) {
             mActionMode.finish();
             return;
         }
@@ -101,16 +104,48 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mActionMode.invalidate();
     }
 
-    private void deleteSelectedItems(){
+    private void deleteSelectedItems() {
         List<Integer> selectList = mFileAdapter.getSelectedItems();
-        if (selectList != null && !selectList.isEmpty()){
-            int index = selectList.size() - 1;
-            while (index >= 0){
-                mFileAdapter.removeData(selectList.get(index));
-                index -= 1;
-            }
+        if (selectList == null || selectList.isEmpty()) {
+            return;
+        }
+        int index = selectList.size() - 1;
+        while (index >= 0) {
+            mFileAdapter.removeData(selectList.get(index));
+            index -= 1;
         }
         mFileAdapter.notifyDataSetChanged();
+    }
+
+    private void showDeleteDialog(ActionMode actionMode){
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.delete_files)
+                .setMessage(R.string.are_you_sure_delete_files)
+                .setPositiveButton(R.string.sure, (dialog, which) -> {
+                    deleteSelectedItems();
+                    dialog.cancel();
+                    actionMode.finish();
+                })
+                .setNegativeButton(R.string.cancel_dialog, (dialog, which) -> {
+                    dialog.cancel();
+                    actionMode.finish();
+                })
+                .create();
+        alertDialog.show();
+    }
+
+    private void shareSelectedItems() {
+        List<Integer> selectList = mFileAdapter.getSelectedItems();
+        if (selectList != null && !selectList.isEmpty()) {
+            MenuItem menuItem = mActionMode.getMenu().findItem(R.id.action_share);
+            if (selectList.size() == 1) {
+                menuItem.setVisible(true);
+                Intent intent = OpenFileUtil.openFile(mFileAdapter.getItem(selectList.get(0)).getPath());
+                startActivity(Intent.createChooser(intent, getTitle()));
+            } else {
+                menuItem.setVisible(false);
+            }
+        }
     }
 
     @Override
@@ -120,18 +155,30 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onRowClick(int index) {
-        if (mFileAdapter.getSelectedItemCount() > 0){
+        if (mFileAdapter.getSelectedItemCount() > 0) {
             enableActionMode(index);
             return;
         }
-        // TODO: 2018/5/3 做点击 Item 处理
+        Doc doc = mFileAdapter.getItem(index);
+        Intent intent = OpenFileUtil.openFile(doc.getPath());
+        if (intent != null) {
+            ComponentName componentName = intent.resolveActivity(getPackageManager());
+            if (componentName != null) {
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, R.string.no_app_for_open_this_file, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, R.string.no_app_for_open_this_file, Toast.LENGTH_SHORT).show();
+        }
+
     }
 
-    private class ActionModelCallback implements ActionMode.Callback{
+    private class ActionModelCallback implements ActionMode.Callback {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.getMenuInflater().inflate(R.menu.menu_action_mode,menu);
+            mode.getMenuInflater().inflate(R.menu.menu_action_mode, menu);
             MainActivity.this.mRefresh.setEnabled(false);
             return true;
         }
@@ -143,10 +190,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            if (item.getItemId() == R.id.action_delete){
-                MainActivity.this.deleteSelectedItems();
+            if (item.getItemId() == R.id.action_delete) {
+                MainActivity.this.showDeleteDialog(mode);
+            } else if (item.getItemId() == R.id.action_share) {
+//                MainActivity.this.shareSelectedItems();
             }
-            mode.finish();
+//            mode.finish();
             return true;
         }
 

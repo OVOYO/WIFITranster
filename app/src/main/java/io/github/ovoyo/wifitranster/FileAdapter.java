@@ -2,6 +2,7 @@ package io.github.ovoyo.wifitranster;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,12 +12,21 @@ import android.widget.TextView;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Flowable;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
@@ -72,12 +82,16 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
                 mListener.onRowClick(position);
             });
         }
-        holder.item.setActivated(mSelectedItems.get(position,false));
+        holder.item.setActivated(mSelectedItems.get(position, false));
     }
 
     @Override
     public int getItemCount() {
         return mDocList == null ? 0 : mDocList.size();
+    }
+
+    public Doc getItem(int position) {
+        return mDocList.get(position);
     }
 
     public void replaceData(boolean clear, List<Doc> data) {
@@ -128,6 +142,33 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
     }
 
     void removeData(int index) {
+        Doc doc = mDocList.get(index);
+        String path = doc.getPath();
+        File file = new File(path);
+        boolean success = false;
+        if (file.exists()) {
+            success = file.delete();
+        }
+        Log.e("FileAdapter", "accept: " + success );
+//        Flowable
+//                .just(path)
+//                .map(s -> {
+//                    File file = new File(s);
+//                    boolean success = false;
+//                    if (file.exists()) {
+//                        success = file.delete();
+//                    }
+//                    return success;
+//                })
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .doOnNext(new Consumer<Boolean>() {
+//                    @Override
+//                    public void accept(Boolean aBoolean) throws Exception {
+//                        Log.e("FileAdapter", "accept: " + aBoolean );
+//                    }
+//                })
+//                .doOnError(Throwable::printStackTrace);
         mDocList.remove(index);
         resetCurrentIndex();
     }

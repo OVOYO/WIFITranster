@@ -30,7 +30,7 @@ import butterknife.Unbinder;
 
 public class PopupMenuDialog {
 
-    Unbinder mUnbinder;
+    private Unbinder mUnbinder;
     @BindView(R.id.popup_menu_title)
     TextView mTxtTitle;
     @BindView(R.id.popup_menu_subtitle)
@@ -45,7 +45,7 @@ public class PopupMenuDialog {
     Button mBtnWifiSettings;
     @BindView(R.id.shared_wifi_button_split_line)
     View mButtonSplitLine;
-    WifiConnectChangedReceiver mWifiConnectChangedReceiver = new WifiConnectChangedReceiver();
+    private WifiConnectChangedReceiver mWifiConnectChangedReceiver = new WifiConnectChangedReceiver();
     private Context context;
     private Dialog dialog;
     private Display display;
@@ -107,12 +107,12 @@ public class PopupMenuDialog {
         }
     }
 
-    void registerWifiConnectChangedReceiver() {
+    private void registerWifiConnectChangedReceiver() {
         IntentFilter intentFilter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         context.registerReceiver(mWifiConnectChangedReceiver, intentFilter);
     }
 
-    void unregisterWifiConnectChangedReceiver() {
+    private void unregisterWifiConnectChangedReceiver() {
         context.unregisterReceiver(mWifiConnectChangedReceiver);
     }
 
@@ -121,7 +121,7 @@ public class PopupMenuDialog {
         checkWifiState(state);
     }
 
-    void checkWifiState(NetworkInfo.State state) {
+    private void checkWifiState(NetworkInfo.State state) {
         if (state == NetworkInfo.State.CONNECTED || state == NetworkInfo.State.CONNECTING) {
             if (state == NetworkInfo.State.CONNECTED) {
                 String ip = Utils.getWifiIp(context);
@@ -136,7 +136,7 @@ public class PopupMenuDialog {
         onWifiDisconnected();
     }
 
-    void onWifiDisconnected() {
+    private void onWifiDisconnected() {
         mTxtTitle.setText(R.string.wlan_disabled);
         mTxtTitle.setTextColor(context.getResources().getColor(android.R.color.black));
         mTxtSubTitle.setVisibility(View.VISIBLE);
@@ -147,7 +147,7 @@ public class PopupMenuDialog {
         mBtnWifiSettings.setVisibility(View.VISIBLE);
     }
 
-    void onWifiConnecting() {
+    private void onWifiConnecting() {
         mTxtTitle.setText(R.string.wlan_enabled);
         mTxtTitle.setTextColor(context.getResources().getColor(R.color.colorWifiConnected));
         mTxtSubTitle.setVisibility(View.GONE);
@@ -158,7 +158,7 @@ public class PopupMenuDialog {
         mBtnWifiSettings.setVisibility(View.GONE);
     }
 
-    void onWifiConnected(String ipAddr) {
+    private void onWifiConnected(String ipAddr) {
         mTxtTitle.setText(R.string.wlan_enabled);
         mTxtTitle.setTextColor(context.getResources().getColor(R.color.colorWifiConnected));
         mTxtSubTitle.setVisibility(View.GONE);
@@ -170,7 +170,7 @@ public class PopupMenuDialog {
         mBtnWifiSettings.setVisibility(View.GONE);
     }
 
-    void onDialogDismiss(DialogInterface dialog) {
+    private void onDialogDismiss(DialogInterface dialog) {
         if (mUnbinder != null) {
             mUnbinder.unbind();
             RxBus.get().post(Constants.RxBusEventType.POPUP_MENU_DIALOG_SHOW_DISMISS, Constants.MSG_DIALOG_DISMISS);
