@@ -11,7 +11,9 @@ public class Doc {
 
     private String type;
 
-    private String modified;
+    private long modified;
+
+    private String date;
 
     public String getPath() {
         return path;
@@ -45,12 +47,20 @@ public class Doc {
         this.type = type;
     }
 
-    public String getModified() {
+    public long getModified() {
         return modified;
     }
 
-    public void setModified(String modified) {
+    public void setModified(long modified) {
         this.modified = modified;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     @Override
@@ -60,7 +70,8 @@ public class Doc {
                 ", name='" + name + '\'' +
                 ", size='" + size + '\'' +
                 ", type='" + type + '\'' +
-                ", modified='" + modified + '\'' +
+                ", modified=" + modified +
+                ", date='" + date + '\'' +
                 '}';
     }
 }

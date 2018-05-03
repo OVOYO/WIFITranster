@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import io.reactivex.Flowable;
@@ -46,7 +47,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
- Animator.AnimatorListener{
+        Animator.AnimatorListener {
 
     private static final int REQ_CODE = 1024;
     private long mCurTimeMills;
@@ -72,26 +73,26 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         setupData();
     }
 
-    private void setupData(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+    private void setupData() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkAndRequestPermission();
-        }else {
-            loadData(false);
+        } else {
+            loadData(true);
         }
     }
 
     /*
     * 从 SDCard 中的 /WIFITransfer/ 中读取文件
     * */
-    private void loadData(boolean refresh){
+    private void loadData(boolean refresh) {
 
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             String dir = Environment.getExternalStorageDirectory().getAbsolutePath()
                     + File.separator
                     + getString(R.string.package_name)
                     + File.separator;
 
-            if (refresh){
+            if (refresh) {
                 mRefresh.setRefreshing(true);
             }
             mDisposable.add(Flowable.just(dir)
@@ -107,23 +108,39 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     })
                     .map(files -> {
                         List<Doc> docList = new ArrayList<>();
-                        if (!files.isEmpty()){
+                        if (!files.isEmpty()) {
                             Doc doc;
-                            for (File f: files) {
+                            for (File f : files) {
                                 doc = new Doc();
                                 doc.setName(f.getName());
                                 doc.setPath(f.getAbsolutePath());
                                 doc.setSize(Utils.getFileSizeString(f.length()));
-                                doc.setModified(Utils.formatDate(f.lastModified()));
+                                long modified = f.lastModified();
+                                doc.setModified(modified);
+                                doc.setDate(Utils.formatDate(modified));
                                 String type = FileTypeUtils.getFileType(f);
-                                if (!TextUtils.isEmpty(type) && type.equals("zip") && doc.getName().endsWith("apk")){
+                                if (!TextUtils.isEmpty(type) && type.equals("zip") && doc.getName().endsWith("apk")) {
                                     doc.setType("apk");
-                                }else {
+                                } else if (!TextUtils.isEmpty(type) && type.equals("zip") && doc.getName().endsWith("jar")) {
+                                    doc.setType("jar");
+                                } else {
                                     doc.setType(type);
                                 }
                                 docList.add(doc);
-                                Log.e("-----", "loadData: " + doc.toString() );
+                                Log.e("-----", "loadData: " + doc.toString());
                             }
+                        }
+                        if (!docList.isEmpty()) {
+                            Collections.sort(docList, (o1, o2) -> {
+                                long docTime1 = o1.getModified();
+                                long docTime2 = o2.getModified();
+                                if (docTime1 < docTime2) {
+                                    return 1;
+                                } else if (docTime1 > docTime2) {
+                                    return -1;
+                                }
+                                return 0;
+                            });
                         }
                         return docList;
                     })
@@ -133,25 +150,25 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         if (refresh && mRefresh.isRefreshing()) {
                             mRefresh.setRefreshing(false);
                         }
-                        mFileAdapter.replaceData(true,files);
+                        mFileAdapter.replaceData(true, files);
                     }, new Consumer<Throwable>() {
                         @Override
                         public void accept(Throwable throwable) throws Exception {
-                            Log.e("----", "accept: " + throwable.getMessage() );
+                            Log.e("----", "accept: " + throwable.getMessage());
                         }
                     }));
         }
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    private void checkAndRequestPermission(){
+    private void checkAndRequestPermission() {
         List<String> lackedPermission = new ArrayList<String>();
         if (!(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
             lackedPermission.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
-        if (lackedPermission.isEmpty()){
-            loadData(false);
-        }else {
+        if (lackedPermission.isEmpty()) {
+            loadData(true);
+        } else {
             String[] requestPermissions = new String[lackedPermission.size()];
             lackedPermission.toArray(requestPermissions);
             requestPermissions(requestPermissions, REQ_CODE);
@@ -171,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQ_CODE && hasAllPermissionsGranted(grantResults)) {
-            loadData(false);
+            loadData(true);
         } else {
             // 如果用户没有授权，那么应该说明意图，引导用户去设置里面授权。
             Toast.makeText(this, R.string.show_user_go_to_settings, Toast.LENGTH_LONG).show();
@@ -182,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
-    private void initViews(){
+    private void initViews() {
         mToolbar = findViewById(R.id.toolbar);
         mRefresh = findViewById(R.id.swipe_refresh_layout);
         mRecycler = findViewById(R.id.recycler_view);
@@ -195,24 +212,24 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
     }
 
-    private void setupTitle(){
+    private void setupTitle() {
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null){
+        if (actionBar != null) {
             actionBar.setTitle(R.string.app_name);
         }
     }
 
-    private void setupRefresh(){
-        mRefresh.setColorSchemeResources(R.color.colorAccent,R.color.colorPrimary);
+    private void setupRefresh() {
+        mRefresh.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary);
         mRefresh.setOnRefreshListener(this);
     }
 
-    private void setupRecycler(){
+    private void setupRecycler() {
         mFileAdapter = new FileAdapter(new ArrayList<>(0));
         LinearLayoutManager layoutManager = new LinearLayoutManager(mRecycler.getContext());
         mRecycler.setLayoutManager(layoutManager);
-        mRecycler.addItemDecoration(new DividerItemDecoration(mRecycler.getContext(),layoutManager.getOrientation()));
+        mRecycler.addItemDecoration(new DividerItemDecoration(mRecycler.getContext(), layoutManager.getOrientation()));
         mRecycler.setHasFixedSize(true);
         mRecycler.setAdapter(mFileAdapter);
     }
@@ -224,11 +241,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK){
-            if (System.currentTimeMillis() - mCurTimeMills > 2000){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (System.currentTimeMillis() - mCurTimeMills > 2000) {
                 Toast.makeText(this, R.string.click_again_to_exit, Toast.LENGTH_SHORT).show();
                 mCurTimeMills = System.currentTimeMillis();
-            }else {
+            } else {
                 finish();
                 System.exit(0);
             }
@@ -275,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
-    @Subscribe( thread = EventThread.MAIN_THREAD, tags = {@Tag( Constants.RxBusEventType.LOAD_BOOK_LIST )} )
+    @Subscribe(thread = EventThread.MAIN_THREAD, tags = {@Tag(Constants.RxBusEventType.LOAD_BOOK_LIST)})
     public void loadAppList(Integer type) {
         loadData(true);
     }

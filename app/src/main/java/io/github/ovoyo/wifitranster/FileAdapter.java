@@ -38,7 +38,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
         String name = TextUtils.isEmpty(doc.getName()) ? "" : doc.getName();
         String size = TextUtils.isEmpty(doc.getSize()) ? "" : doc.getSize();
         String type = TextUtils.isEmpty(doc.getType()) ? "" : doc.getType();
-        String time = TextUtils.isEmpty(doc.getModified()) ? "" : doc.getModified();
+        String time = TextUtils.isEmpty(doc.getDate()) ? "" : doc.getDate();
         holder.name.setText(name);
         holder.size.setText(size);
         holder.type.setText(type);
