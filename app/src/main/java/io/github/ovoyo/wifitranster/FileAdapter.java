@@ -2,10 +2,11 @@ package io.github.ovoyo.wifitranster;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -22,13 +23,26 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
 
     private List<Doc> mDocList;
 
+    private FileAdapterClickListener mListener;
+
+    private static int currentSelectedIndex = -1;
+    private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
+
     FileAdapter(List<Doc> docList) {
         mDocList = docList;
     }
 
+    public FileAdapterClickListener getListener() {
+        return mListener;
+    }
+
+    public void setListener(FileAdapterClickListener listener) {
+        mListener = listener;
+    }
+
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.doc_item_layout,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.doc_item_layout, parent, false);
         return new VH(view);
     }
 
@@ -43,11 +57,22 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
         holder.size.setText(size);
         holder.type.setText(type);
         holder.time.setText(time);
-        if (TextUtils.isEmpty(type)){
+        if (TextUtils.isEmpty(type)) {
             holder.textIcon.setText("文件");
-        }else {
+        } else {
             holder.textIcon.setText(type.toUpperCase(Locale.getDefault()));
         }
+        if (mListener != null) {
+            holder.item.setOnLongClickListener(v -> {
+                mListener.onRowLongClick(position);
+                v.performHapticFeedback(0);
+                return true;
+            });
+            holder.item.setOnClickListener(v -> {
+                mListener.onRowClick(position);
+            });
+        }
+        holder.item.setActivated(mSelectedItems.get(position,false));
     }
 
     @Override
@@ -55,21 +80,66 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
         return mDocList == null ? 0 : mDocList.size();
     }
 
-    public void replaceData(boolean clear, List<Doc> data){
-        if (data == null || data.isEmpty()){
+    public void replaceData(boolean clear, List<Doc> data) {
+        if (data == null || data.isEmpty()) {
             return;
         }
-        if (mDocList == null){
+        if (mDocList == null) {
             mDocList = new ArrayList<>();
         }
-        if (clear && !mDocList.isEmpty()){
+        if (clear && !mDocList.isEmpty()) {
             mDocList.clear();
         }
         mDocList.addAll(data);
         notifyDataSetChanged();
     }
 
-    static class VH extends RecyclerView.ViewHolder{
+    public interface FileAdapterClickListener {
+        void onRowLongClick(int index);
+
+        void onRowClick(int index);
+    }
+
+    void clearSelections() {
+        mSelectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    void toggleSelection(int index) {
+        currentSelectedIndex = index;
+        if (mSelectedItems.get(index, false)) {
+            mSelectedItems.delete(index);
+        } else {
+            mSelectedItems.put(index, true);
+        }
+        notifyItemChanged(index);
+    }
+
+    int getSelectedItemCount() {
+        return mSelectedItems.size();
+    }
+
+    List<Integer> getSelectedItems() {
+        ArrayList<Integer> indexList = new ArrayList<>(mSelectedItems.size());
+        for (int i = 0; i < mSelectedItems.size(); i++) {
+            indexList.add(mSelectedItems.keyAt(i));
+        }
+        return indexList;
+    }
+
+    void removeData(int index) {
+        mDocList.remove(index);
+        resetCurrentIndex();
+    }
+
+    private void resetCurrentIndex() {
+        currentSelectedIndex = -1;
+    }
+
+    static class VH extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.doc_item)
+        RelativeLayout item;
 
         @BindView(R.id.doc_icon)
         CircleImageView icon;
@@ -91,7 +161,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
 
         VH(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
         }
     }
 }

@@ -16,6 +16,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.Toast;
 
@@ -32,11 +35,9 @@ import com.hwangjr.rxbus.annotation.Tag;
 import com.hwangjr.rxbus.thread.EventThread;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import io.reactivex.Flowable;
@@ -47,7 +48,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
-        Animator.AnimatorListener {
+        Animator.AnimatorListener,FileAdapter.FileAdapterClickListener {
 
     private static final int REQ_CODE = 1024;
     private long mCurTimeMills;
@@ -61,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private final CompositeDisposable mDisposable = new CompositeDisposable();
 
+    private ActionMode mActionMode;
+    private ActionModelCallback mActionModelCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +75,87 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         setupRefresh();
         setupRecycler();
         setupData();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main,menu);
+        return true;
+    }
+
+    private void enableActionMode(int index){
+        if (mActionMode == null){
+            mActionMode = startSupportActionMode(mActionModelCallback);
+        }
+        toggleSelection(index);
+    }
+
+    private void toggleSelection(int index){
+        mFileAdapter.toggleSelection(index);
+        int count = mFileAdapter.getSelectedItemCount();
+        if (count == 0){
+            mActionMode.finish();
+            return;
+        }
+        mActionMode.setTitle(String.valueOf(count));
+        mActionMode.invalidate();
+    }
+
+    private void deleteSelectedItems(){
+        List<Integer> selectList = mFileAdapter.getSelectedItems();
+        if (selectList != null && !selectList.isEmpty()){
+            int index = selectList.size() - 1;
+            while (index >= 0){
+                mFileAdapter.removeData(selectList.get(index));
+                index -= 1;
+            }
+        }
+        mFileAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onRowLongClick(int index) {
+        enableActionMode(index);
+    }
+
+    @Override
+    public void onRowClick(int index) {
+        if (mFileAdapter.getSelectedItemCount() > 0){
+            enableActionMode(index);
+            return;
+        }
+        // TODO: 2018/5/3 做点击 Item 处理
+    }
+
+    private class ActionModelCallback implements ActionMode.Callback{
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_action_mode,menu);
+            MainActivity.this.mRefresh.setEnabled(false);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            if (item.getItemId() == R.id.action_delete){
+                MainActivity.this.deleteSelectedItems();
+            }
+            mode.finish();
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            MainActivity.this.mRefresh.setEnabled(true);
+            MainActivity.this.mFileAdapter.clearSelections();
+            mActionMode = null;
+        }
     }
 
     private void setupData() {
@@ -210,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             objectAnimator.addListener(this);
             objectAnimator.start();
         });
+        mActionModelCallback = new ActionModelCallback();
     }
 
     private void setupTitle() {
@@ -227,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void setupRecycler() {
         mFileAdapter = new FileAdapter(new ArrayList<>(0));
+        mFileAdapter.setListener(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mRecycler.getContext());
         mRecycler.setLayoutManager(layoutManager);
         mRecycler.addItemDecoration(new DividerItemDecoration(mRecycler.getContext(), layoutManager.getOrientation()));
