@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     actionMode.finish();
                 })
                 .create();
+        alertDialog.setCanceledOnTouchOutside(true);
         alertDialog.show();
     }
 
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         if (intent != null) {
             ComponentName componentName = intent.resolveActivity(getPackageManager());
             if (componentName != null) {
-                startActivity(intent);
+                startActivity(Intent.createChooser(intent,getString(R.string.choose_open_file_type)));
             } else {
                 Toast.makeText(this, R.string.no_app_for_open_this_file, Toast.LENGTH_SHORT).show();
             }

@@ -1,16 +1,3 @@
-/**
-* Upload5 0.1.0
-* (c) 2011 BitCandies
-* http://github.com/bitcandies/upload5
-*
-* Upload5 is a flexible HTML5/JavaScript library that handles multiple file uploads.
-*
-* Upload5 is freely distributable under the MIT license,
-* see LICENSE.
-*
-* http://www.bitcandies.com/
-*/
-
 var bitcandies = bitcandies || {};
 
 bitcandies.defaults = function (dest, source) {
