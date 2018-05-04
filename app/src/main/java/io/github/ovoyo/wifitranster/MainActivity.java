@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -365,7 +366,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         mFileAdapter.setListener(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mRecycler.getContext());
         mRecycler.setLayoutManager(layoutManager);
-        mRecycler.addItemDecoration(new DividerItemDecoration(mRecycler.getContext(), layoutManager.getOrientation()));
+        DividerItemDecoration decoration = new DividerItemDecoration(mRecycler.getContext(), layoutManager.getOrientation());
+        decoration.setDrawable(getResources().getDrawable(R.drawable.list_divider));
+        mRecycler.addItemDecoration(decoration);
         mRecycler.setHasFixedSize(true);
         mRecycler.setAdapter(mFileAdapter);
     }

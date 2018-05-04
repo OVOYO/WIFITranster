@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#607D8B</color>
-    <color name="colorPrimaryDark">#455A64</color>
-    <color name="colorAccent">#448AFF</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
 
     <color name="colorWifiConnected">#6495ED</color>
 
-    <color name="doc_name">#ff212121</color>
-    <color name="doc_size_type_time">#ff757575</color>
+    <color name="doc_name">#ff111111</color>
+    <color name="doc_size_type_time">#ff7a7a7a</color>
     <color name="bg_circle_default">#ff666666</color>
     <color name="bg_action_mode">#ff757575</color>
     <color name="row_activated">#ffe0e0e0</color>
@@ -21,4 +21,5 @@
     <color name="secondary_text">#757575</color>
     <color name="icons">#FFFFFF</color>
     <color name="divider">#BDBDBD</color>
+
 </resources>
