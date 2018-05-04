@@ -5,9 +5,6 @@
     <string name="show_user_go_to_settings">应用缺少必要的权限！请点击\"权限\"，打开所需要的权限。</string>
     <string name="package_text">package:</string>
     <string name="click_again_to_exit">再次点击退出程序</string>
-    <string name="unknow_file_type">未知文件类型</string>
-    <string name="android_file">Android 文件</string>
-    <string name="pic_file">图片</string>
 
     <string name="wlan_enabled">WLAN服务已开启</string>
     <string name="wlan_disabled">WLAN服务未开启</string>

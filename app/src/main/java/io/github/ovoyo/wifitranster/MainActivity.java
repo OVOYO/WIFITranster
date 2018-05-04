@@ -262,7 +262,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                                     doc.setType(type);
                                 }
                                 docList.add(doc);
-                                Log.e("-----", "loadData: " + doc.toString());
                             }
                         }
                         if (!docList.isEmpty()) {
@@ -386,6 +385,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 finish();
                 System.exit(0);
             }
+            return true;
         }
         return super.onKeyDown(keyCode, event);
     }

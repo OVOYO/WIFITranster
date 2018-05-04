@@ -13,35 +13,4 @@
     <color name="row_activated">#ffe0e0e0</color>
     <color name="pop_window_bg">#E7E7E7</color>
 
-    <color name="apk">#ff8bc34a</color>
-    <color name="zip">#ffe51c23</color>
-    <color name="rar">#ff9c27b0</color>
-    <color name="jpg">#ff673ab7</color>
-    <color name="png">#ff3f51b5</color>
-    <color name="gif">#ff5677fc</color>
-    <color name="tig">#ff03a9f4</color>
-    <color name="bmp">#ff00bcd4</color>
-    <color name="dwg">#ff009688</color>
-    <color name="html">#ffcddc39</color>
-    <color name="rtf">#ffffeb3b</color>
-    <color name="xml">#ffff9800</color>
-    <color name="psd">#ffff5722</color>
-    <color name="eml">#ff795548</color>
-    <color name="dbx">#ff9e9e9e</color>
-    <color name="pst">#ff607d8b</color>
-    <color name="office">#ff607d8b</color>
-    <color name="mdb">#ff607d8b</color>
-    <color name="wpd">#ff607d8b</color>
-    <color name="eps">#ff607d8b</color>
-    <color name="ps">#ff607d8b</color>
-    <color name="pdf">#ff607d8b</color>
-    <color name="wav">#ff607d8b</color>
-    <color name="avi">#ff607d8b</color>
-    <color name="ram">#ff607d8b</color>
-    <color name="rm">#ff607d8b</color>
-    <color name="mpg">#ff607d8b</color>
-    <color name="mov">#ff607d8b</color>
-    <color name="asf">#ff607d8b</color>
-    <color name="mid">#ff607d8b</color>
-
 </resources>
