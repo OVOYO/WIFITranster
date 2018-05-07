@@ -3,6 +3,7 @@ package io.github.ovoyo.wifitranster;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +58,7 @@ public final class FileTypeUtils {
     public static String getFileType(File file) {
         getAllFileType();
         String fileExtendName = null;
-        FileInputStream is;
+        FileInputStream is = null;
         try {
             is = new FileInputStream(file);
             byte[] b = new byte[16];
@@ -70,7 +71,6 @@ public final class FileTypeUtils {
                     if (fileExtendName.equals("office")) {
                         fileExtendName = getOfficeFileType(is);
                     }
-                    is.close();
                     break;
                 }
             }
@@ -85,11 +85,18 @@ public final class FileTypeUtils {
                 // 如果有扩展名，则返回扩展名
                 return fileName.substring(fileName.indexOf(".") + 1);
             }
-            is.close();
             return fileExtendName;
         } catch (Exception exception) {
             exception.printStackTrace();
             return null;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

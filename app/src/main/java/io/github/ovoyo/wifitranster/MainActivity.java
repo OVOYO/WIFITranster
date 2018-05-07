@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             MenuItem menuItem = mActionMode.getMenu().findItem(R.id.action_share);
             if (selectList.size() == 1) {
                 menuItem.setVisible(true);
-                Intent intent = OpenFileUtil.openFile(mFileAdapter.getItem(selectList.get(0)).getPath());
+                Intent intent = OpenFileUtil.openFile(MainActivity.this,mFileAdapter.getItem(selectList.get(0)).getPath());
                 startActivity(Intent.createChooser(intent, getTitle()));
             } else {
                 menuItem.setVisible(false);
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             return;
         }
         Doc doc = mFileAdapter.getItem(index);
-        Intent intent = OpenFileUtil.openFile(doc.getPath());
+        Intent intent = OpenFileUtil.openFile(MainActivity.this,doc.getPath());
         if (intent != null) {
             ComponentName componentName = intent.resolveActivity(getPackageManager());
             if (componentName != null) {
